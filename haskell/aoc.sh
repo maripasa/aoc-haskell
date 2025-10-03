@@ -22,8 +22,8 @@ if [ -d "$SCRIPT_DIR/day$padded_day" ]; then
 fi
 
 mkdir -p "$SCRIPT_DIR/day$padded_day"
-touch "$SCRIPT_DIR/day$padded_day/Day$padded_day.hs"
 echo "$input" > "$SCRIPT_DIR/day$padded_day/input"
 cp "$SCRIPT_DIR/build" "$SCRIPT_DIR/day$padded_day/"
+cp "$SCRIPT_DIR/template.hs" "$SCRIPT_DIR/day$padded_day/Day$padded_day.hs"
 
 echo "done"
