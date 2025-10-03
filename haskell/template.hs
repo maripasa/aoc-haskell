@@ -10,7 +10,7 @@ parse = id
 
 
 main :: IO ()
-main = readFile "input" >>= \file -> do
+main = readFile "DAY/input" >>= \file -> do
   let content = parse file
   (print . part1) content
   (print . part2) content

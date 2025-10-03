@@ -23,7 +23,5 @@ fi
 
 mkdir -p "$SCRIPT_DIR/day$padded_day"
 echo "$input" > "$SCRIPT_DIR/day$padded_day/input"
-cp "$SCRIPT_DIR/build" "$SCRIPT_DIR/day$padded_day/"
-cp "$SCRIPT_DIR/template.hs" "$SCRIPT_DIR/day$padded_day/Day$padded_day.hs"
-
+sed "s/DAY/day$padded_day/g" template.hs > "day$padded_day/Day$padded_day.hs"
 echo "done"

@@ -19,7 +19,7 @@ level2 = go 0 1
 
 main :: IO ()
 main = do
-  fileContent <- readFile "input"
+  fileContent <- readFile "day01/input"
   (print . level) fileContent
   (print . level2) fileContent
 

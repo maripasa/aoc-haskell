@@ -1,3 +1,0 @@
-ghc -Wall -O2 -o solve.exe $1
-./solve.exe
-rm *.o *.hi
