@@ -1,0 +1,47 @@
+#!/bin/bash
+
+declare -a cmd
+SCRIPT_PATH="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
+
+joinpath() {
+  local base="$1"
+  local add="$2"
+  base="${base%/}"
+  add="${add#/}"
+  printf "%s/%s" "$base" "$add"
+}
+
+cmd_append(){
+  cmd+=("$1")
+}
+
+build(){
+  
+}
+
+BUILD_DIR=$(joinpath $SCRIPT_PATH "./build/")
+SRC_DIR=$(joinpath $SCRIPT_PATH "./src/")
+LIB_DIR=$(joinpath $SCRIPT_PATH "../lib")
+
+ghc_flags_full(){
+  cmd_append "-Wcompat"
+  cmd_append "-Widentities"
+  cmd_append "-Wredundant-constraints"
+  cmd_append "-Wmissing-export-lists"
+  cmd_append "-Wmissing-import-lists"
+  cmd_append "-Wpartial-fields"
+  cmd_append "-Werror=incomplete-patterns"
+  cmd_append "-Werror=incomplete-record-updates"
+  cmd_append "-ferror-spans"
+  cmd_append "-O2"
+}
+
+ghc_flags_full(){
+  cmd_append "-Wall"
+  cmd_append "-i$LIB_DIR"
+  cmd_append "-i$SRC_DIR"
+}
+
+ghc_cmd(){
+  cmd_append "ghc"
+}
