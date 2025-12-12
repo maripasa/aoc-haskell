@@ -38,10 +38,15 @@ rayIntersects (px,py) ((x1,y1),(x2,y2))
       let x = x1
           ymin = min y1 y2
           ymax = max y1 y2
-      in  py > ymin && py <= ymax && x > px
+      in  py > ymin
+       && py <= ymax
+       && x > px
        
 pointInPolygon :: [Seg] -> Pt -> Bool
-pointInPolygon segs p = any (pointOnSegment p) segs || odd (length [() | seg <- segs, rayIntersects p seg])
+pointInPolygon segs p =
+  if any (pointOnSegment p) segs
+    then True
+    else odd (length [() | seg <- segs, rayIntersects p seg])
 
 main :: IO ()
 main = do
@@ -51,9 +56,10 @@ main = do
   let poly   = edges coords
       diags  = comb coords
 
-  let part1Max
-    | null diags = 0
-    | otherwise  = maximum (map (uncurry areaByDiag) diags)
+  let part1Max =
+        if null diags
+          then 0
+          else maximum (map (uncurry areaByDiag) diags)
 
   let validDiags =
         [ (p,q)
@@ -61,8 +67,9 @@ main = do
         , all (pointInPolygon poly) (pointsRect p q)
         ]
 
-  let part2
-    | null validDiags = 0
-    | otherwise       =  maximum (map (uncurry areaByDiag) validDiags)
+  let part2 =
+        if null validDiags
+          then 0
+          else maximum (map (uncurry areaByDiag) validDiags)
 
   print part2
