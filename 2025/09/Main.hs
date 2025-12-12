@@ -63,10 +63,10 @@ edges xs = side (xs ++ [head xs])
 
 -- cartesian x, y, 0 based.
 
-areaByDiag (a,b) (c,d) = abs (a - c + 1) * abs (b - d + 1)
+areaByDiag (a,b) (c,d) = (abs (a - c) + 1) * (abs (b - d) + 1)
 
 main = do
-  c <- readFile "input_test" >>= (\f -> return . map (\x -> read $ "(" ++ x ++ ")") . lines $ f)
+  c <- readFile "input" >>= (\f -> return . map (\x -> read $ "(" ++ x ++ ")") . lines $ f)
   let coords :: [(Int, Int)]
       coords = c
   let diags = comb coords
@@ -75,7 +75,7 @@ main = do
   let polygon = edges coords
       part2 = part1 . map (\[a,b] -> (a,b)) . filter (all (inside polygon)) . map (uncurry otherPoints) $ diags
 
-  return part2
+  print part2
 
 
 cellChar :: [((Int,Int),(Int,Int))] -> (Int,Int) -> Char
