@@ -1,6 +1,9 @@
-import Data.List (tails)
+import Data.List
+import Debug.Trace
+import Control.DeepSeq
+import Data.Ord
 
-type Pt  = (Int, Int)
+type Pt  = (Double, Double)
 type Seg = (Pt, Pt)
 
 readCoords :: String -> [Pt]
@@ -12,64 +15,46 @@ edges xs = zip xs (tail (cycle xs))
 comb :: [a] -> [(a,a)]
 comb xs = [(a,b) | (a,rest) <- zip xs (tail (tails xs)), b <- rest]
 
-areaByDiag :: Pt -> Pt -> Int
-areaByDiag (a,b) (c,d) =
-  (abs (a - c) + 1) * (abs (b - d) + 1)
+isLineRect :: Seg -> Bool
+isLineRect diag = vertical diag || horizontal diag
 
-pointsRect :: Pt -> Pt -> [Pt]
-pointsRect (a,b) (c,d) =
-  [ (x,y)
-  | x <- [min a c .. max a c]
-  , y <- [min b d .. max b d]
-  ]
+smallerRect ((x1, y1), (x2, y2)) = ((min x1 x2 + 0.5, min y1 y2 + 0.5), (max x1 x2 - 0.5, max y1 y2 - 0.5))
+biggerRect ((x1, y1), (x2, y2)) = ((min x1 x2 - 0.5, min y1 y2 - 0.5), (max x1 x2 + 0.5, max y1 y2 + 0.5))
 
-pointOnSegment :: Pt -> Seg -> Bool
-pointOnSegment (px,py) ((x1,y1),(x2,y2))
-  | x1 == x2 =
-      px == x1 && py >= min y1 y2 && py <= max y1 y2
-  | y1 == y2 =
-      py == y1 && px >= min x1 x2 && px <= max x1 x2
-  | otherwise = False
+otherPoints ((x1,y1),(x2,y2)) = [(x1, y1), (x1, y2), (x2, y2), (x2, y1)]
 
-rayIntersects :: Pt -> Seg -> Bool
-rayIntersects (px,py) ((x1,y1),(x2,y2))
-  | y1 == y2 = False
-  | otherwise =
-      let x = x1
-          ymin = min y1 y2
-          ymax = max y1 y2
-      in  py > ymin
-       && py <= ymax
-       && x > px
-       
-pointInPolygon :: [Seg] -> Pt -> Bool
-pointInPolygon segs p =
-  if any (pointOnSegment p) segs
-    then True
-    else odd (length [() | seg <- segs, rayIntersects p seg])
+areaByDiag :: Seg -> Double
+areaByDiag ((x1, y1), (x2, y2)) =
+  (abs (x1 - x2) + 1) * (abs (y1 - y2) + 1)
 
-main :: IO ()
+vertical ((x1, y1), (x2, y2)) = x1 == x2
+horizontal ((x1, y1), (x2, y2)) = y1 == y2
+
+inside poly square = isValid poly-- 0
+  where
+    ((x1,y1),(x2,y2)) = head square
+    a = (x1 + x2) / 2
+    b = (y1 + y2) / 2
+    rightLine = ((a, b), (a + 20000, b))
+    isValid [] = True
+    isValid (e:es) = not (any (intersects e) square) && isValid (es)-- (n + fromEnum (intersects e rightLine))
+
+intersects lin1 lin2
+  | vertical lin1 == vertical lin2 = False
+  | horizontal lin1 = crossesHV lin1 lin2
+  | otherwise       = crossesHV lin2 lin1
+
+crossesHV ((hx1,hy),(hx2, _)) ((vx,vy1),(_,vy2)) = (between hx1 hx2 vx) && (between vy1 vy2 hy)
+
+between a b x = min a b <= x && x <= max a b 
+  
 main = do
   file <- readFile "input"
   let coords = readCoords file
-
   let poly   = edges coords
-      diags  = comb coords
-
-  let part1Max =
-        if null diags
-          then 0
-          else maximum (map (uncurry areaByDiag) diags)
-
-  let validDiags =
-        [ (p,q)
-        | (p,q) <- diags
-        , all (pointInPolygon poly) (pointsRect p q)
-        ]
-
-  let part2 =
-        if null validDiags
-          then 0
-          else maximum (map (uncurry areaByDiag) validDiags)
-
-  print part2
+      diags  = comb $ coords
+      x = round . areaByDiag . head . map (biggerRect)
+        . filter (inside poly . edges . otherPoints)
+        . map (smallerRect) . reverse . sortBy (comparing areaByDiag) . filter (not . isLineRect) $ diags
+  print x
+  return x
